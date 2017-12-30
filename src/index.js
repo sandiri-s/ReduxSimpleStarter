@@ -1,10 +1,11 @@
 import React, {Component} from 'react';
 import ReactDom from 'react-dom';
 import SearchBar from './components/search_bar';
-//import config from './config'
+import config from './config'
 import YTSearch from 'youtube-api-search'
 import VideoList from './components/video_list'
 import VideoDetail from './components/video_details'
+import _ from 'lodash';
 
 const API_KEY = config.key
 
@@ -17,21 +18,28 @@ this.state = {
   videos : [],
   selectedVideo : null
 };
-YTSearch({key : API_KEY , term: 'KTR telangana'},
-(videos) => {
-this.setState({
-  videos : videos,
-  selectedVideo : videos[0]
-});
-});
+this.videoSearch('KTR Telangana');
+
+}
+
+videoSearch (term){
+  YTSearch({key : API_KEY , term: term},
+  (videos) => {
+  this.setState({
+    videos : videos,
+    selectedVideo : videos[0]
+  });
+  });
 }
 
 render() {
+
+  const videoSearch = _.debounce((term) => {this.videoSearch(term)},300);
   return (
     <div>
-    <SearchBar />
-    <VideoDetail  onVideoSelect={selectedVideo => this.setState({selectedVideo}) }  video={this.state.selectedVideo}/>
-    <VideoList   videos = {this.state.videos} />
+    <SearchBar onSearchTermChange ={videoSearch}/>
+    <VideoDetail    video={this.state.selectedVideo} />
+    <VideoList   onVideoSelect={selectedVideo => this.setState({selectedVideo}) } videos = {this.state.videos} />
      </div>);
 }
 }
